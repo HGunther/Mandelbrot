@@ -60,11 +60,12 @@ auto timeMandelbrot(int n, int width, int height)
 
 int main()
 {
-	//Time how long it takes to generate the mandelbrot set
 	const int n = 10;
-	const int width = 100;
-	const int height = 100;
-	std::cout << "Generaging " << n << " mandelbrots of size " << width << "x" << height << std::endl;
+	const int width = 640;
+	const int height = 640;
+
+	//Time how long it takes to generate the mandelbrot set
+	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << std::endl;
 	std::vector<double> times = timeMandelbrot(n, width, height);
 
 	//Print out relevant stats about the timing
@@ -86,6 +87,6 @@ int main()
 	std::cout << "File saved as mandelbrot.ppm" << std::endl;
 
 
-	system("pause");
+	//system("pause");
 	return 0;
 }

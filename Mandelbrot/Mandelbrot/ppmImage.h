@@ -1,5 +1,7 @@
 #ifndef ppmImage_H
 #define ppmImage_H
+#include <vector>
+#include <iostream>
 
 struct Color {
 	int r;
@@ -7,7 +9,7 @@ struct Color {
 	int b;
 };
 
-using image = std::vector<std::vector<Color>>;
+using image = std::vector< std::vector<Color> >;
 
 /**
 A function to print out an image in plain PPM format.
