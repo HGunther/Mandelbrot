@@ -1,0 +1,3 @@
+C:/Users/Hans/Source/Repos/Mandelbrot/Mandelbrot/Mandelbrot/CMakeFiles/mandelbrot.dir
+C:/Users/Hans/Source/Repos/Mandelbrot/Mandelbrot/Mandelbrot/CMakeFiles/ALL_BUILD.dir
+C:/Users/Hans/Source/Repos/Mandelbrot/Mandelbrot/Mandelbrot/CMakeFiles/ZERO_CHECK.dir
