@@ -40,7 +40,7 @@ auto timeSeriesMandelbrot(const int n, const int width, const int height)
 auto timeThreadedMethod1(const int n, const int width, const int height)
 {
 	std::vector<double> times{};
-	auto x = [width, height]() {return threadedMethod1(width, height); };
+	auto x = [width, height]() {return Mandelbrot_H::threadedMethod1(width, height); };
 	for (int i = 0; i < n; i++)
 	{
 		double nseconds = double(TimeF_H::timeFunction(x).count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
@@ -52,7 +52,7 @@ auto timeThreadedMethod1(const int n, const int width, const int height)
 auto timeThreadedMethod2(const int n, const int width, const int height)
 {
 	std::vector<double> times{};
-	auto x = [width, height]() {return threadedMethod2(width, height); };
+	auto x = [width, height]() {return Mandelbrot_H::threadedMethod2(width, height); };
 	for (int i = 0; i < n; i++)
 	{
 		double nseconds = double(TimeF_H::timeFunction(x).count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
@@ -75,17 +75,17 @@ int main()
 
 	//Time how it takes to generate with threads using method 1
 	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using threaded algorithm 1." << std::endl;
-	times = Mandelbrot_H::timeThreadedMethod1(n, width, height);
+	times = timeThreadedMethod1(n, width, height);
 	printStats(times);
 
 	//Time how it takes to generate with threads using method 2
-	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using threaded algorithm 2." << std::endl;
-	times = Mandelbrot_H::timeThreadedMethod2(10, width, height);
-	printStats(times);
+	//	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using threaded algorithm 2." << std::endl;
+	//	times = timeThreadedMethod2(10, width, height);
+	//	printStats(times);
 
 
 	//Save a copy of the image
-	ppmImage_H::image img = threadedMethod2(width, height);
+	ppmImage_H::image img = Mandelbrot_H::threadedMethod2(width, height);
 	std::ofstream ofile;
 	ofile.open("mandelbrot.ppm");
 	ppmImage_H::writeImage(img, ofile);

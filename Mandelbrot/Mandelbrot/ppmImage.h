@@ -1,5 +1,6 @@
 #ifndef ppmImage_H
 #define ppmImage_H
+#include <cmath>
 #include <vector>
 #include <iostream>
 
@@ -48,7 +49,7 @@ Color colorize(int x)
 		temp.b = 255;
 	else
 		temp.b = x * x;
-	temp.r = int(sqrt(x) * sqrt(255)); //red is sensitive to low values
+	temp.r = int(std::sqrt(x) * std::sqrt(255)); //red is sensitive to low values
 	temp.g = x; // green makes the picture white instead of purple
 	return temp;
 }
