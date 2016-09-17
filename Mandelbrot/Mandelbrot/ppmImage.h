@@ -40,4 +40,17 @@ void writeImage(image const& img, std::ostream & os)
 	return;
 }
 
+Color colorize(int x)
+{
+	Color temp(0, 0, 0);
+
+	if (x * x > 255) //blue is sensitive to high values
+		temp.b = 255;
+	else
+		temp.b = x * x;
+	temp.r = int(sqrt(x) * sqrt(255)); //red is sensitive to low values
+	temp.g = x; // green makes the picture white instead of purple
+	return temp;
+}
+
 #endif

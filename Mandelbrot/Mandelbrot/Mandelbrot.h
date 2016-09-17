@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include <thread>
+#include <atomic>
 #include "ppmImage.h"
 
 template<typename T>
@@ -45,17 +46,8 @@ image seriesMandelbrot(const int width, const int height)
 		{
 			//Map from pixel coordinates to valid mandelbrot area (x:-2.5 to 1, y: -1 to 1)
 			double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
-			double y = (h * 2 / float(height + 1)) + float(2 / float(width) / 2) - 1;
-
-			int result = int(Mandelbrot_H::Mandelbrot(x, y) / 1000.0 * 255);
-
-			//Coloring scheme based on result value
-			if (result * result > 255) //blue is sensitive to high values
-				img[h][w].b = 255;
-			else
-				img[h][w].b = result * result;
-			img[h][w].r = int(sqrt(result) * sqrt(255)); //red is sensitive to low values
-			img[h][w].g = result; // green makes the picture white instead of purple
+			double y = (h * 2 / float(height + 1)) + float(2 / float(height) / 2) - 1;
+			img[h][w] = ppmImage_H::colorize(int(Mandelbrot(x, y) / 1000.0 * 255));
 		}
 	}
 	return img;
@@ -69,14 +61,7 @@ image threadedMethod1( const int width, const int height)
 	auto calcMandelbrot = [& img](double x, double y, int h, int w)
 	{
 		ppmImage_H::Color temp;
-		int result =  Mandelbrot(x, y); 
-		if (result * result > 255)
-			temp.b = 255;
-		else
-			temp.b = result * result;
-		temp.r = int(sqrt(result) * sqrt(255));
-		temp.g = result;
-		img[h][w] = temp;
+		img[h][w] = ppmImage_H::colorize(int(Mandelbrot(x, y) /1000.0 * 255));
 	};
 
 	//Create threads
@@ -86,7 +71,7 @@ image threadedMethod1( const int width, const int height)
 		{
 			//Map from pixel coordinates to valid mandelbrot area (x:-2.5 to 1, y: -1 to 1)
 			double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
-			double y = (h * 2 / float(height + 1)) + float(2 / float(width) / 2) - 1;
+			double y = (h * 2 / float(height + 1)) + float(2 / float(height) / 2) - 1;
 			threads[h][w] = new std::thread(calcMandelbrot, x, y, h, w);
 		}
 	}
@@ -103,6 +88,61 @@ image threadedMethod1( const int width, const int height)
 	return img;
 }
 
+image threadedMethod2(const int width, const int height)
+{
+	struct param
+	{
+		param() { x = 0; y = 0; }
+		param(double a, double b) { x = a; y = b; }
+		double x;
+		double y;
+	};
+
+	std::atomic_int counter = 0;
+	ppmImage_H::image img = std::vector<std::vector<ppmImage_H::Color>>(height, std::vector<ppmImage_H::Color>(width, Color()));
+	std::vector<std::vector<param>> pool = std::vector<std::vector<param>>(height, std::vector<param>(width));
+
+	//Initialize the pool with the values I want to calculate
+	for (int h = 0; h < height; h++)
+	{
+		for (int w = 0; w < width; w++)
+		{
+			//Map from pixel coordinates to valid mandelbrot area (x:-2.5 to 1, y: -1 to 1)
+			double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
+			double y = (h * 2 / float(height + 1)) + float(2 / float(height) / 2) - 1;
+			pool[h][w] = param(x, y);
+		}
+	}
+
+	auto processor = [&img, &counter, &pool, height, width]()
+	{
+		int temp = counter++;
+		while (temp < height * width)
+		{
+			int h = temp / width;
+			int w = temp % width;
+			img[h][w] = ppmImage_H::colorize(int(Mandelbrot(pool[h][w].x, pool[h][w].y) / 1000.0 * 255));
+			temp = counter++;
+		}
+		return;
+	};
+
+	std::vector<std::thread> threads = std::vector<std::thread>(4);
+
+	//create threads
+	for (int t = 0; t < 4; t++)
+	{
+		threads[t] = std::thread(processor);
+	}
+
+	//close threads
+	for (int t = 0; t < 4; t++)
+	{
+		threads[t].join();
+	}
+
+	return img;
+}
 
 
 
