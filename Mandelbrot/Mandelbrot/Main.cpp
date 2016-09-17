@@ -43,7 +43,7 @@ auto timeThreadedMethod1(const int n, const int width, const int height)
 	{
 		double nseconds = double(TimeF_H::timeFunction(x).count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
 		times.push_back(nseconds);
-		std::cout << i+1 << "th run finshed." << std::endl;
+		std::cout << i+1 << " run finshed." << std::endl;
 	}
 	return times;
 }
@@ -63,23 +63,24 @@ auto timeThreadedMethod2(const int n, const int width, const int height)
 int main()
 {
 	const int n = 10;
-	const int width = 100;
-	const int height = 100;
+	const int width = 640;
+	const int height = 640;
 
 	//Time how long it takes to generate the mandelbrot set
 	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using in series algorithm." << std::endl;
-	std::vector<double> times = timeSeriesMandelbrot(0, width, height);
+	std::vector<double> times = timeSeriesMandelbrot(10, width, height);
 	printStats(times);  //Print out stats for in series calculations
 
 
 	//Time how it takes to generate with threads using method 1
-	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using threaded algorithm 1." << std::endl;
-	times = Mandelbrot_H::timeThreadedMethod1(n, width, height);
+	std::cout << "Generating " << n / 3 << " mandelbrots of size " << width/10 << "x" << height/10 << " using threaded algorithm 1." << std::endl;
+	std::cout << "This method is crazy slow. That's why it is doing fewer, smaller sets." << std::endl;
+	times = Mandelbrot_H::timeThreadedMethod1(n / 3, width/10, height/10);
 	printStats(times);
 
 	//Time how it takes to generate with threads using method 2
 	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using threaded algorithm 2." << std::endl;
-	times = Mandelbrot_H::timeThreadedMethod2(0, width, height);
+	times = Mandelbrot_H::timeThreadedMethod2(10, width, height);
 	printStats(times);
 
 
