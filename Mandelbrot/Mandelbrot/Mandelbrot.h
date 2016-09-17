@@ -98,7 +98,7 @@ image threadedMethod2(const int width, const int height)
 		double y;
 	};
 
-	std::atomic_int counter = 0;
+	std::atomic_int counter(0);
 	ppmImage_H::image img = std::vector<std::vector<ppmImage_H::Color>>(height, std::vector<ppmImage_H::Color>(width, Color()));
 	std::vector<std::vector<param>> pool = std::vector<std::vector<param>>(height, std::vector<param>(width));
 

@@ -6,6 +6,8 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+#include <thread>
+#include <atomic>
 #include "TimeF.h"
 #include "Mandelbrot.h"
 
