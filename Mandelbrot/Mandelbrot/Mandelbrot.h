@@ -53,36 +53,34 @@ image seriesMandelbrot(const int width, const int height)
 	return img;
 }
 
-image threadedMethod1( const int width, const int height)
+image threadedMethod1(const int width, const int height)
 {
 	ppmImage_H::image img = std::vector<std::vector<ppmImage_H::Color>>(height, std::vector<ppmImage_H::Color>(width, Color()));
-	std::vector<std::vector<std::thread *>> threads = std::vector<std::vector<std::thread * >>(height, std::vector<std::thread * >(width));
+	std::vector<std::thread> threads{};// = std::vector<std::vector<std::thread>>(height, std::vector<std::thread>(width));
 
-	auto calcMandelbrot = [& img](double x, double y, int h, int w)
-	{
-		ppmImage_H::Color temp;
-		img[h][w] = ppmImage_H::colorize(int(Mandelbrot(x, y) /1000.0 * 255));
-	};
-
-	//Create threads
-	for (int h = 0; h < height; h++)
+	auto calcRow = [&img, width, height](int h)
 	{
 		for (int w = 0; w < width; w++)
 		{
 			//Map from pixel coordinates to valid mandelbrot area (x:-2.5 to 1, y: -1 to 1)
 			double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
 			double y = (h * 2 / float(height + 1)) + float(2 / float(height) / 2) - 1;
-			threads[h][w] = new std::thread(calcMandelbrot, x, y, h, w);
+
+			ppmImage_H::Color temp;
+			img[h][w] = ppmImage_H::colorize(int(Mandelbrot(x, y) / 1000.0 * 255));
 		}
+	};
+
+	//Create threads
+	for (int h = 0; h < height; h++)
+	{
+		threads.push_back(std::thread(calcRow, h));
 	}
 
 	//Wait for threads to finish
 	for (int h = 0; h < height; h++)
 	{
-		for (int w = 0; w < width; w++)
-		{
-			threads[h][w]->join();
-		}
+			threads[h].join();
 	}
 
 	return img;
