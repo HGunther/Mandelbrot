@@ -1,10 +1,13 @@
 #ifndef Mandelbrot_H
 #define Mandelbrot_H
 #include <complex>
+#include <vector>
+#include <array>
+#include <thread>
 #include "ppmImage.h"
 
 template<typename T>
-int Mandelbrot(std::complex<T> c)
+int Mandelbrot(const std::complex<T> c)
 {
 	return Mandelbrot(c.real(), c.imag());
 }
@@ -13,7 +16,7 @@ int Mandelbrot(std::complex<T> c)
 Takes a complex number and returns how many cycles it took to reject the numbre from the mandelbrot set. The maximum return is 1000.
 This code is based on pseudo code from https://en.wikipedia.org/wiki/Mandelbrot_set.
 **/
-int Mandelbrot(double r, double i)
+int Mandelbrot(const double r, const double i)
 {
 	if (r <= -2.5 || r > 1)
 		return 0;
@@ -33,16 +36,13 @@ int Mandelbrot(double r, double i)
 }
 
 
-image seriesMandelbrot(int width, int height)
+image seriesMandelbrot(const int width, const int height)
 {
-	ppmImage_H::image img;
+	ppmImage_H::image img = std::vector<std::vector<ppmImage_H::Color>>(height, std::vector<ppmImage_H::Color>(width, Color()));
 	for (int h = 0; h < height; h++)
 	{
-		std::vector<ppmImage_H::Color> v{};
 		for (int w = 0; w < width; w++)
 		{
-			ppmImage_H::Color temp;
-
 			//Map from pixel coordinates to valid mandelbrot area (x:-2.5 to 1, y: -1 to 1)
 			double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
 			double y = (h * 2 / float(height + 1)) + float(2 / float(width) / 2) - 1;
@@ -51,74 +51,57 @@ image seriesMandelbrot(int width, int height)
 
 			//Coloring scheme based on result value
 			if (result * result > 255) //blue is sensitive to high values
-				temp.b = 255;
+				img[h][w].b = 255;
 			else
-				temp.b = result * result;
-			temp.r = int(sqrt(result) * sqrt(255)); //red is sensitive to low values
-			temp.g = result; // green makes the picture white instead of purple
-
-			v.push_back(temp);
+				img[h][w].b = result * result;
+			img[h][w].r = int(sqrt(result) * sqrt(255)); //red is sensitive to low values
+			img[h][w].g = result; // green makes the picture white instead of purple
 		}
-		img.push_back(v);
 	}
 	return img;
 }
 
-auto timeSeriesMandelbrot(int n, int width, int height)
+image threadedMethod1( const int width, const int height)
 {
-	std::vector<double> times{};
-	auto x = [width, height]() {return seriesMandelbrot(width, height); };
-	for (int i = 0; i < n; i++)
-	{
-		double nseconds = double(TimeF_H::timeFunction(x).count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
-		times.push_back(nseconds);
-	}
-	return times;
-}
+	ppmImage_H::image img = std::vector<std::vector<ppmImage_H::Color>>(height, std::vector<ppmImage_H::Color>(width, Color()));
+	std::vector<std::vector<std::thread *>> threads = std::vector<std::vector<std::thread * >>(height, std::vector<std::thread * >(width));
 
-image threadedMandelbrot(int width, int height)
-{
-	ppmImage_H::image img;
+	auto calcMandelbrot = [& img](double x, double y, int h, int w)
+	{
+		ppmImage_H::Color temp;
+		int result =  Mandelbrot(x, y); 
+		if (result * result > 255)
+			temp.b = 255;
+		else
+			temp.b = result * result;
+		temp.r = int(sqrt(result) * sqrt(255));
+		temp.g = result;
+		img[h][w] = temp;
+	};
+
+	//Create threads
 	for (int h = 0; h < height; h++)
 	{
-		std::vector<ppmImage_H::Color> v{};
 		for (int w = 0; w < width; w++)
 		{
-			ppmImage_H::Color temp;
-
 			//Map from pixel coordinates to valid mandelbrot area (x:-2.5 to 1, y: -1 to 1)
 			double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
 			double y = (h * 2 / float(height + 1)) + float(2 / float(width) / 2) - 1;
-
-			int result = int(Mandelbrot_H::Mandelbrot(x, y) / 1000.0 * 255);
-
-			//Coloring scheme based on result value
-			if (result * result > 255) //blue is sensitive to high values
-				temp.b = 255;
-			else
-				temp.b = result * result;
-			temp.r = int(sqrt(result) * sqrt(255)); //red is sensitive to low values
-			temp.g = result; // green makes the picture white instead of purple
-
-			v.push_back(temp);
+			threads[h][w] = new std::thread(calcMandelbrot, x, y, h, w);
 		}
-		img.push_back(v);
 	}
+
+	//Wait for threads to finish
+	for (int h = 0; h < height; h++)
+	{
+		for (int w = 0; w < width; w++)
+		{
+			threads[h][w]->join();
+		}
+	}
+
 	return img;
 }
-
-auto timeThreadedMandelbrot(int n, int width, int height)
-{
-	std::vector<double> times{};
-	auto x = [width, height]() {return seriesMandelbrot(width, height); };
-	for (int i = 0; i < n; i++)
-	{
-		double nseconds = double(TimeF_H::timeFunction(x).count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
-		times.push_back(nseconds);
-	}
-	return times;
-}
-
 
 
 
