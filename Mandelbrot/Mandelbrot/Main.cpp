@@ -79,9 +79,9 @@ int main()
 	printStats(times);
 
 	//Time how it takes to generate with threads using method 2
-	//	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using threaded algorithm 2." << std::endl;
-	//	times = timeThreadedMethod2(10, width, height);
-	//	printStats(times);
+	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using threaded algorithm 2." << std::endl;
+	times = timeThreadedMethod2(10, width, height);
+	printStats(times);
 
 
 	//Save a copy of the image
