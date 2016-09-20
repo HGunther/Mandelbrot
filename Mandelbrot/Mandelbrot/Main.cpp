@@ -64,8 +64,8 @@ auto timeThreadedMethod2(const int n, const int width, const int height)
 int main()
 {
 	const int n = 10;
-	const int width = 640;
-	const int height = 640;
+	const int width = 350;
+	const int height = 200;
 
 	//Time how long it takes to generate the mandelbrot set
 	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using in series algorithm." << std::endl;
