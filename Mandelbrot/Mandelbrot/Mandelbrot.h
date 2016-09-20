@@ -66,7 +66,6 @@ image threadedMethod1(const int width, const int height)
 			double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
 			double y = (h * 2 / float(height + 1)) + float(2 / float(height) / 2) - 1;
 
-			ppmImage_H::Color temp;
 			img[h][w] = ppmImage_H::colorize(int(Mandelbrot(x, y) / 1000.0 * 255));
 		}
 	};
