@@ -74,7 +74,7 @@ image threadedMethod1(const int width, const int height)
 	//Create threads
 	for (int h = 0; h < height; h++)
 	{
-		threads.push_back(std::thread(calcRow, h));
+		threads.emplace_back(std::thread(calcRow, h));
 	}
 
 	//Wait for threads to finish

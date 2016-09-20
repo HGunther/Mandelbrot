@@ -63,13 +63,13 @@ auto timeThreadedMethod2(const int n, const int width, const int height)
 
 int main()
 {
-	const int n = 10;
+	const int n = 2;
 	const int width = 640;
 	const int height = 640;
 
 	//Time how long it takes to generate the mandelbrot set
 	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using in series algorithm." << std::endl;
-	std::vector<double> times = timeSeriesMandelbrot(10, width, height);
+	std::vector<double> times = timeSeriesMandelbrot(n, width, height);
 	printStats(times);  //Print out stats for in series calculations
 
 
@@ -80,7 +80,7 @@ int main()
 
 	//Time how it takes to generate with threads using method 2
 	std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using threaded algorithm 2." << std::endl;
-	times = timeThreadedMethod2(10, width, height);
+	times = timeThreadedMethod2(n, width, height);
 	printStats(times);
 
 
@@ -93,6 +93,6 @@ int main()
 	std::cout << "File saved as mandelbrot.ppm" << std::endl;
 
 
-	//system("pause");
+	system("pause");
 	return 0;
 }
