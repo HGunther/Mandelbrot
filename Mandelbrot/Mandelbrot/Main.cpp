@@ -63,7 +63,7 @@ auto timeThreadedMethod2(const int n, const int width, const int height)
 
 int main()
 {
-	const int n = 2;
+	const int n = 10;
 	const int width = 640;
 	const int height = 640;
 
@@ -93,6 +93,6 @@ int main()
 	std::cout << "File saved as mandelbrot.ppm" << std::endl;
 
 
-	system("pause");
+	//system("pause");
 	return 0;
 }
