@@ -6,6 +6,7 @@
 #include <thread>
 #include <atomic>
 #include "ppmImage.h"
+#include "ThreadPool.h"
 
 template<typename T>
 int Mandelbrot(const std::complex<T> c)
@@ -141,6 +142,98 @@ image threadedMethod2(const int width, const int height)
 	return img;
 }
 
+image threadpoolPixel(const int width, const int height, const int num_threads)
+{
+	ppmImage_H::image img = std::vector<std::vector<ppmImage_H::Color>>(height, std::vector<ppmImage_H::Color>(width, Color()));
 
+	{
+		//create threadpool
+		ThreadPool_H::ThreadPool pool(num_threads, width*height);
+
+		//create jobs
+		for (int h = 0; h < height; h++)
+		{
+			std::vector<std::function<void(void)>> jobs{};
+			for (int w = 0; w < width; w++)
+			{
+				//Map from pixel coordinates to valid mandelbrot area (x:-2.5 to 1, y: -1 to 1)
+				double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
+				double y = (h * 2 / float(height + 1)) + float(2 / float(height) / 2) - 1;
+				std::function<void(void)> f = [x, y, w, h, &img]()
+				{
+					img[h][w] = ppmImage_H::colorize(int(Mandelbrot(x, y) / 1000.0 * 255));
+					return;
+				};
+				jobs.push_back(f);
+				//pool.post(f);
+			}
+			pool.postVector(jobs);
+		}
+		//pool is deconstructed here. It will wait for the jobs to finish before deconstructing.
+	}	
+	return img;
+}
+
+image threadpoolRow(const int width, const int height, const int num_threads)
+{
+	ppmImage_H::image img = std::vector<std::vector<ppmImage_H::Color>>(height, std::vector<ppmImage_H::Color>(width, Color()));
+
+	{
+		//create threadpool
+		ThreadPool_H::ThreadPool pool(num_threads, height);
+
+		//create jobs
+		for (int h = 0; h < height; h++)
+		{
+			std::function<void(void)> f = [&img, h, width, height]()
+				{
+					for (int w = 0; w < width; w++)
+					{
+						//Map from pixel coordinates to valid mandelbrot area (x:-2.5 to 1, y: -1 to 1)
+						double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
+						double y = (h * 2 / float(height + 1)) + float(2 / float(height) / 2) - 1;
+
+						img[h][w] = ppmImage_H::colorize(int(Mandelbrot(x, y) / 1000.0 * 255));
+					}
+				};
+			pool.post(f);
+		}
+		//pool is deconstructed here. It will wait for the jobs to finish before deconstructing.
+	}
+	return img;
+}
+
+image threadpoolMultiRow(const int width, const int height, const int num_threads, const long chunk_size)
+{
+	ppmImage_H::image img = std::vector<std::vector<ppmImage_H::Color>>(height, std::vector<ppmImage_H::Color>(width, Color()));
+	unsigned num_jobs = std::ceil(width*height / float(chunk_size));
+	{
+		//create threadpool
+		ThreadPool_H::ThreadPool pool(num_threads, num_jobs );
+
+		//create jobs
+		for (unsigned i = 0; i < num_jobs; i++)
+		{
+			std::function<void(void)> f = [&img, i, chunk_size, width, height]()
+			{
+				for (int p = 0; p < chunk_size && (p+ chunk_size*i) < width*height; p++)
+				{
+					int h = (i*chunk_size + p) / width;
+					int w = (i*chunk_size + p) % width;
+					
+					//Map from pixel coordinates to valid mandelbrot area (x:-2.5 to 1, y: -1 to 1)
+					double x = (w * 3.5 / float(width + 1)) + float(3.5 / float(width) / 2.0) - 2.5;
+					double y = (h * 2 / float(height + 1)) + float(2 / float(height) / 2) - 1;
+
+					img[h][w] = ppmImage_H::colorize(int(Mandelbrot(x, y) / 1000.0 * 255));
+				}
+			};
+			pool.post(f);
+		}
+
+		//pool is deconstructed here. It will wait for the jobs to finish before deconstructing.
+	}
+	return img;
+}
 
 #endif
