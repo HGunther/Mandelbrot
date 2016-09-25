@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 #include <atomic>
+#include <condition_variable>
 
 class ThreadPool
 {
