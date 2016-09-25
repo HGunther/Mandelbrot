@@ -3,7 +3,7 @@ project (MANDELBROT)
 
 find_package (Threads)
 
-add_executable( mandelbrot Main.cpp)
+add_executable( mandelbrot Main.cpp ThreadPool.cpp)
 
 SET(CMAKE_CXX_FLAGS "-std=c++1y")
 

@@ -111,16 +111,16 @@ int main()
 	printStats(times);
 
 
-	std::function<void(int,int,int)> num_cores_test_funct = [](int n, int height, int width) {
+	std::function<void(int,int,int)> num_cores_test_funct = [](int n, int height, int width, int num_cores) {
 		unsigned num_threads = n; //std::thread::hardware_concurrency();
 		//Time how it takes to generate with using the threadpool method
 		std::cout << "Generating " << n << " mandelbrots of size " << width << "x" << height << " using a threadpool with " << num_threads << " threads." << std::endl;
 		std::vector<double> times = timeThreadpoolRow(n, width, height, num_threads);
 		printStats(times);
 	};
-	for (int i = 0; i < 8; i++)
+	for (int i = 1; i <= 8; i++)
 	{
-		num_cores_test_funct(i, height, width);
+		num_cores_test_funct(10, height, width, i);
 	}
 
 
@@ -133,7 +133,7 @@ int main()
 	};
 	for (int i = 0; std::pow(2, i) < height*width; i++)
 	{
-		chunk_size_test_funct(4, height, width, std::pow(2, i));
+		chunk_size_test_funct(10, height, width, std::pow(2, i));
 	}
 
 
@@ -148,6 +148,6 @@ int main()
 	std::cout << "File saved as mandelbrot.ppm" << std::endl;
 
 
-	system("pause");
+	//system("pause");
 	return 0;
 }
